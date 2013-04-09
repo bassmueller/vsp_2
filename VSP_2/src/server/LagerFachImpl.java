@@ -23,6 +23,7 @@ public class LagerFachImpl extends FachPOA {
     public LagerFachImpl(String name, LagerImpl store) {
         this.name = name;
         this.store = store;
+        this.count = 0;
     }//LagerFachImpl
     
     /* (non-Javadoc)
@@ -68,7 +69,7 @@ public class LagerFachImpl extends FachPOA {
                 throw new ENotEnoughPieces();
         else
             throw new EInvalidCount();
-        	store.informiereMonitore(String.format("name: %s, %d pieces removed. number of pieces: %d", this.name, anzahl, this.count));
+        store.informiereMonitore(String.format("name: %s, %d pieces removed. number of pieces: %d", this.name, anzahl, this.count));
     }//auslagern
     
     public void setLager(LagerImpl lager) {

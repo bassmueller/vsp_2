@@ -9,7 +9,6 @@ import org.omg.PortableServer.POAPackage.WrongPolicy;
 
 import lagern.Fach;
 import lagern.FachHelper;
-import lagern.FachHolder;
 import lagern.LagerPOA;
 import lagern.Monitor;
 import lagern.TFachlisteHolder;
@@ -81,8 +80,10 @@ public class LagerImpl extends LagerPOA {
 
 	@Override
 	public void monitorHinzufuegen(Monitor theMonitor) {
-		this.monitore.add(theMonitor);
-		this.informiereMonitore(theMonitor + "Monitor hinzugefügt");
+		if(!this.monitore.contains(theMonitor)){
+			this.monitore.add(theMonitor);
+			this.informiereMonitore(String.format("Monitor: %s erfolgreich hinzugefügt!", theMonitor));
+		}
 	}
 
 	@Override
