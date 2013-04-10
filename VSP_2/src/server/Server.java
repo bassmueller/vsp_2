@@ -1,5 +1,7 @@
 package server;
 
+import java.util.Properties;
+
 import lagern.Lager;
 import lagern.LagerHelper;
 
@@ -21,21 +23,30 @@ public class Server {
 	public static void main(String args[]){
 			
 		try {
-			ORB orb = ORB.init(args, null);
-			POA rootpoa = POAHelper.narrow(orb.resolve_initial_references("RootPoa"));
+			Properties props = new Properties();
+			props.put("org.omg.CORBA.ORBInitialPort", "1050");
+			props.put("org.omg.CORBA.ORBInitialHost", "141.22.27.102");
+			ORB orb = ORB.init(args, props);
+			System.out.println("ORB initialisiert");
+			POA rootpoa = POAHelper.narrow(orb.resolve_initial_references("RootPOA"));
 			rootpoa.the_POAManager().activate();
-			LagerImpl servant = new LagerImpl();
+			System.out.println("RootPOA aktiviert");
 			
+			LagerImpl servant = new LagerImpl(orb);
 			org.omg.CORBA.Object ref = rootpoa.servant_to_reference(servant);
 			Lager href = LagerHelper.narrow(ref);
+			System.out.println("Lager-Object referenziert");
 			
 			org.omg.CORBA.Object objref = orb.resolve_initial_references("NameService");
-			
 			NamingContextExt ncRef = NamingContextExtHelper.narrow(objref);
+			servant.setNcRef(ncRef);
+			System.out.println("NameService erhalten");
 			
 			String name = "Lager";
 			NameComponent path[] = ncRef.to_name(name);
+			servant.setPath(path);
 			ncRef.rebind(path, href);
+			System.out.println("Lager-Object im NameService registriert");
 			
 			orb.run();
 		} catch (InvalidName e) {

@@ -1,9 +1,17 @@
 package server;
 
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import org.omg.CORBA.ORB;
+import org.omg.CosNaming.NameComponent;
+import org.omg.CosNaming.NamingContextExt;
+import org.omg.CosNaming.NamingContextPackage.CannotProceed;
+import org.omg.CosNaming.NamingContextPackage.InvalidName;
+import org.omg.CosNaming.NamingContextPackage.NotFound;
 import org.omg.PortableServer.POAPackage.ServantNotActive;
 import org.omg.PortableServer.POAPackage.WrongPolicy;
 
@@ -17,13 +25,23 @@ import lagern.LagerPackage.ENotFound;
 
 public class LagerImpl extends LagerPOA {
 
-	private Map<String, Fach> lager = new HashMap<String, Fach>();
+	private Map<String, Fach> lager;
 	private List<Monitor>monitore;
+	private ORB orb;
+	private NameComponent path[];
+	private NamingContextExt ncRef;
+	
+	public LagerImpl(ORB orb){
+		this.lager = new HashMap<String, Fach>();
+		this.monitore = new LinkedList<Monitor>();
+		this.orb = orb;
+	}
 
 	@Override
 	public int getFachliste(TFachlisteHolder fachliste) {
-		// TODO Auto-generated method stub
-		return 0;
+		Collection<Fach> c = this.lager.values();
+		fachliste.value = c.toArray(new Fach[0]);
+		return this.lager.size();
 	}
 
 	@Override
@@ -82,7 +100,7 @@ public class LagerImpl extends LagerPOA {
 	public void monitorHinzufuegen(Monitor theMonitor) {
 		if(!this.monitore.contains(theMonitor)){
 			this.monitore.add(theMonitor);
-			this.informiereMonitore(String.format("Monitor: %s erfolgreich hinzugefügt!", theMonitor));
+			//this.informiereMonitore(String.format("Monitor: %s erfolgreich hinzugefuegt!", theMonitor));
 		}
 	}
 
@@ -97,11 +115,35 @@ public class LagerImpl extends LagerPOA {
 			this.monitore.get(0).exit();
 			this.monitore.remove(0);
 		}
+		//TODO
+		/*this.orb.shutdown(false);
+		try {
+			this.ncRef.unbind(path);
+		} catch (NotFound e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (CannotProceed e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (InvalidName e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}*/
 	}
 	
 	public void informiereMonitore(String msg){
-		for(Monitor monitor: monitore){
-			monitor.meldung(msg);
+		if(!monitore.isEmpty()){
+			for(Monitor monitor: monitore){
+				monitor.meldung(msg);
+			}
 		}
+	}
+
+	public void setPath(NameComponent[] path) {
+		this.path = path;
+	}
+
+	public void setNcRef(NamingContextExt ncRef) {
+		this.ncRef = ncRef;
 	}
 }
