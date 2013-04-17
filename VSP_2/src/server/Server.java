@@ -23,10 +23,10 @@ public class Server {
 	public static void main(String args[]){
 			
 		try {
-			Properties props = new Properties();
-			props.put("org.omg.CORBA.ORBInitialPort", "1050");
-			props.put("org.omg.CORBA.ORBInitialHost", "141.22.27.102");
-			ORB orb = ORB.init(args, props);
+			//Properties props = new Properties();
+			//props.put("org.omg.CORBA.ORBInitialPort", "1049");
+			//props.put("org.omg.CORBA.ORBInitialHost", "localhost");
+			ORB orb = ORB.init(args, null);
 			System.out.println("ORB initialisiert");
 			POA rootpoa = POAHelper.narrow(orb.resolve_initial_references("RootPOA"));
 			rootpoa.the_POAManager().activate();
@@ -42,7 +42,7 @@ public class Server {
 			servant.setNcRef(ncRef);
 			System.out.println("NameService erhalten");
 			
-			String name = "Lager";
+			String name = args[4];
 			NameComponent path[] = ncRef.to_name(name);
 			servant.setPath(path);
 			ncRef.rebind(path, href);

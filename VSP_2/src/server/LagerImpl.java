@@ -115,8 +115,7 @@ public class LagerImpl extends LagerPOA {
 			this.monitore.get(0).exit();
 			this.monitore.remove(0);
 		}
-		//TODO
-		/*this.orb.shutdown(false);
+		
 		try {
 			this.ncRef.unbind(path);
 		} catch (NotFound e) {
@@ -128,7 +127,26 @@ public class LagerImpl extends LagerPOA {
 		} catch (InvalidName e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}*/
+		}
+		
+		new Thread(new Runnable(){
+
+			@Override
+			public void run() {
+				try {
+					Thread.sleep(5000);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				System.out.println("Herunterfahren des ORB´s von Lager");
+				orb.shutdown(true);
+				System.out.println("Lager erfolgreich beendet!");
+			}
+			
+		}).start();
+
+		
 	}
 	
 	public void informiereMonitore(String msg){
