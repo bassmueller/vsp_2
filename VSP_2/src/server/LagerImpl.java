@@ -1,3 +1,8 @@
+/**
+ * 
+ * @author Martin Schindler, Sebastian Mueller
+ * 
+ */
 package server;
 
 import java.util.Collection;
@@ -100,13 +105,12 @@ public class LagerImpl extends LagerPOA {
 	public void monitorHinzufuegen(Monitor theMonitor) {
 		if(!this.monitore.contains(theMonitor)){
 			this.monitore.add(theMonitor);
-			//this.informiereMonitore(String.format("Monitor: %s erfolgreich hinzugefuegt!", theMonitor));
 		}
 	}
 
 	@Override
 	public void monitorEntfernen(Monitor theMonitor) {
-		this.monitore.remove(this.monitore.indexOf(theMonitor));
+		this.monitore.remove(theMonitor);
 	}
 
 	@Override

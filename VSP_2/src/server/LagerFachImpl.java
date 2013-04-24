@@ -1,3 +1,8 @@
+/**
+ * 
+ * @author Martin Schindler, Sebastian Mueller
+ * 
+ */
 package server;
 
 import lagern.FachPOA;

@@ -1,6 +1,9 @@
+/**
+ * 
+ * @author Martin Schindler, Sebastian Mueller
+ * 
+ */
 package server;
-
-import java.util.Properties;
 
 import lagern.Lager;
 import lagern.LagerHelper;
