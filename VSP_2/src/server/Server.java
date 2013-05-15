@@ -1,9 +1,8 @@
 /**
  * 
- * @author Martin Schindler, Sebastian Mueller
- * 
  */
 package server;
+
 
 import lagern.Lager;
 import lagern.LagerHelper;
@@ -21,6 +20,22 @@ import org.omg.PortableServer.POAManagerPackage.AdapterInactive;
 import org.omg.PortableServer.POAPackage.ServantNotActive;
 import org.omg.PortableServer.POAPackage.WrongPolicy;
 
+
+
+/**
+ * 
+ * Verteilte Systeme Praktikum: "Aufgabe 1: Lager"
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ * 
+ * Server Anwendung.
+ * -----------------
+ * 
+ * server -ORBInitialHost <IP> -ORBInitialPort <Port> Lager
+ * 
+ * 
+ * @author Sebastian Mueller 2008588, Martin Schindler 2022759
+ *
+ */
 public class Server {
 	
 	public static void main(String args[]){
@@ -30,51 +45,44 @@ public class Server {
 			//props.put("org.omg.CORBA.ORBInitialPort", "1049");
 			//props.put("org.omg.CORBA.ORBInitialHost", "localhost");
 			ORB orb = ORB.init(args, null);
-			System.out.println("ORB initialisiert");
+			System.out.println("Server: ORB initialisiert");
 			POA rootpoa = POAHelper.narrow(orb.resolve_initial_references("RootPOA"));
 			rootpoa.the_POAManager().activate();
-			System.out.println("RootPOA aktiviert");
+			System.out.println("Server: RootPOA aktiviert");
 			
 			LagerImpl servant = new LagerImpl(orb);
 			org.omg.CORBA.Object ref = rootpoa.servant_to_reference(servant);
 			Lager href = LagerHelper.narrow(ref);
-			System.out.println("Lager-Object referenziert");
+			System.out.println("Server: Lager-Object referenziert");
 			
 			org.omg.CORBA.Object objref = orb.resolve_initial_references("NameService");
 			NamingContextExt ncRef = NamingContextExtHelper.narrow(objref);
 			servant.setNcRef(ncRef);
-			System.out.println("NameService erhalten");
+			System.out.println("Server: NameService erhalten");
 			
 			String name = args[4];
 			NameComponent path[] = ncRef.to_name(name);
 			servant.setPath(path);
 			ncRef.rebind(path, href);
-			System.out.println("Lager-Object im NameService registriert");
+			System.out.println("Server: Lager-Object im NameService registriert");
 			
 			orb.run();
 		} catch (InvalidName e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			System.err.println("Server: ERROR InvalidName");
 		} catch (AdapterInactive e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			System.err.println("Server: ERROR AdapterInteractive");
 		} catch (ServantNotActive e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			System.err.println("Server: ERROR ServantNotActive");
 		} catch (WrongPolicy e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			System.err.println("Server: ERROR WrongPolicy");
 		} catch (org.omg.CosNaming.NamingContextPackage.InvalidName e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			System.err.println("Server: ERROR InvalidName");
 		} catch (NotFound e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			System.err.println("Server: ERROR NotFound");
 		} catch (CannotProceed e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+			System.err.println("Server: ERROR CannotProceed");
+		}//try
 		
-	}
+	}//main
 
-}
+}//Server

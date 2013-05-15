@@ -1,9 +1,8 @@
 /**
  * 
- * @author Martin Schindler, Sebastian Mueller
- * 
  */
 package server;
+
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -28,6 +27,14 @@ import lagern.TFachlisteHolder;
 import lagern.LagerPackage.EAlreadyExists;
 import lagern.LagerPackage.ENotFound;
 
+
+
+
+/**
+ * 
+ * @author Martin Schindler, Sebastian Mueller
+ * 
+ */
 public class LagerImpl extends LagerPOA {
 
 	private Map<String, Fach> lager;
@@ -36,19 +43,28 @@ public class LagerImpl extends LagerPOA {
 	private NameComponent path[];
 	private NamingContextExt ncRef;
 	
+	
+	
+	/**
+	 * 
+	 * @param orb Object Request Broker.
+	 */
 	public LagerImpl(ORB orb){
 		this.lager = new HashMap<String, Fach>();
 		this.monitore = new LinkedList<Monitor>();
 		this.orb = orb;
-	}
+	}//LagerImpl
 
+	
+	
 	@Override
 	public int getFachliste(TFachlisteHolder fachliste) {
 		Collection<Fach> c = this.lager.values();
 		fachliste.value = c.toArray(new Fach[0]);
 		return this.lager.size();
-	}
+	}//getFachliste
 
+	
 	@Override
 	public synchronized Fach neu(String name) throws EAlreadyExists {
 		Fach neuesFach = null;
@@ -63,21 +79,22 @@ public class LagerImpl extends LagerPOA {
 			try{
 				ref = _poa().servant_to_reference(lagerfach);
 			}catch(ServantNotActive e){
-				this.informiereMonitore(String.format("Servant von %s nicht aktiv!", name));
+				this.informiereMonitore(String.format("Fach: Servant von %s nicht aktiv!", name));
 				e.printStackTrace();
 			}catch (WrongPolicy e){
-				this.informiereMonitore(String.format("%s  besitzt falsche Policy!", name));
+				this.informiereMonitore(String.format("Fach: %s  besitzt falsche Policy!", name));
 				e.printStackTrace();
-			}
+			}//try
 			
 			neuesFach = FachHelper.narrow(ref);
 			this.lager.put(name, neuesFach);
 
 			this.informiereMonitore(String.format("Fach: %s  erfolgreich angelegt!", name));
-		}
+		}//if
 		return neuesFach;
-	}
+	}//neu
 
+	
 	@Override
 	public synchronized void loeschen(String name) throws ENotFound {
 		if(this.lager.containsKey(name)){
@@ -87,9 +104,10 @@ public class LagerImpl extends LagerPOA {
 			String msg = String.format("Fach: %s  konnte nicht entfernt werden, da das Fach im Lager nicht existiert!", name);
 			this.informiereMonitore(msg);
 			throw new ENotFound(msg);
-		}
-	}
+		}//if
+	}//loeschen
 
+	
 	@Override
 	public Fach hole(String name) throws ENotFound {
 		Fach fach = this.lager.get(name);
@@ -97,75 +115,85 @@ public class LagerImpl extends LagerPOA {
 			String msg = String.format("Fach: %s konnte nicht geholt werden, da das Fach im Lager nicht existiert!", name);
 			this.informiereMonitore(msg);
 			throw new ENotFound(msg);
-		}
+		}//if
 		return fach;
-	}
+	}//hole
 
+	
 	@Override
 	public void monitorHinzufuegen(Monitor theMonitor) {
 		if(!this.monitore.contains(theMonitor)){
 			this.monitore.add(theMonitor);
-		}
-	}
+			this.informiereMonitore("Lager: Monitor erfolgreich hinzugefuegt!");
+		}//if
+	}//monitorHinzufuegen
 
+	
 	@Override
 	public void monitorEntfernen(Monitor theMonitor) {
-		this.monitore.remove(theMonitor);
-	}
+		this.monitore.remove(this.monitore.indexOf(theMonitor));
+	}//monitorEntfernen
 
+	
 	@Override
 	public void exit() {
 		while(!this.monitore.isEmpty()){
 			this.monitore.get(0).exit();
 			this.monitore.remove(0);
-		}
+		}//while
 		
 		try {
 			this.ncRef.unbind(path);
 		} catch (NotFound e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			System.err.println("Lager: ERROR NameService NotFound");
 		} catch (CannotProceed e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			System.err.println("Lager: ERROR CannotProceed");
 		} catch (InvalidName e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+			System.err.println("Lager: ERROR InvalidName");
+		}//try
 		
-		new Thread(new Runnable(){
-
+		new Thread(new Runnable() {
 			@Override
 			public void run() {
 				try {
 					Thread.sleep(5000);
 				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					System.err.println("Lager: ERROR Interrupted");
 				}
-				System.out.println("Herunterfahren des ORB´s von Lager");
+				System.out.println("Lager: Herunterfahren des ORB");
 				orb.shutdown(true);
-				System.out.println("Lager erfolgreich beendet!");
-			}
-			
+				System.out.println("Lager: Erfolgreich beendet!");
+			}//run
 		}).start();
-
-		
-	}
+	}//exit
 	
-	public void informiereMonitore(String msg){
-		if(!monitore.isEmpty()){
-			for(Monitor monitor: monitore){
+	
+	/**
+	 * 
+	 * @param msg Message for the Monitor.
+	 */
+	public void informiereMonitore(String msg) {
+		if(!monitore.isEmpty())
+			for(Monitor monitor: monitore)
 				monitor.meldung(msg);
-			}
-		}
-	}
+	}//informiereMonitore
 
+	
+	/**
+	 * 
+	 * @param path
+	 */
 	public void setPath(NameComponent[] path) {
 		this.path = path;
-	}
+	}//setPath
 
+	
+	/**
+	 * 
+	 * @param ncRef NamingContext Reference
+	 */
 	public void setNcRef(NamingContextExt ncRef) {
 		this.ncRef = ncRef;
-	}
-}
+	}//setNcRef
+	
+}//LagerImpl

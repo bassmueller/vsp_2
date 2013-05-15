@@ -1,35 +1,49 @@
 /**
  * 
- * @author Martin Schindler, Sebastian Mueller
- * 
  */
 package server;
+
 
 import lagern.FachPOA;
 import lagern.FachPackage.EInvalidCount;
 import lagern.FachPackage.ENotEnoughPieces;
 
 
+
 /**
- * @author 
- *
+ * 
+ * @author Martin Schindler, Sebastian Mueller
+ * 
  */
 public class LagerFachImpl extends FachPOA {
     
     private String name;
     private LagerImpl store;
-    
     private int count;  // stored pieces
     
+    
+    
+    /**
+     * 
+     * @param name
+     */
     public LagerFachImpl(String name) {
         this.name = name;
     }//LagerFachImpl
     
+    /**
+     * 
+     * @param name
+     * @param store
+     */
     public LagerFachImpl(String name, LagerImpl store) {
         this.name = name;
         this.store = store;
         this.count = 0;
     }//LagerFachImpl
+    
+    
+    
     
     /* (non-Javadoc)
      * @see lagern.FachOperations#anzahl()
@@ -58,10 +72,9 @@ public class LagerFachImpl extends FachPOA {
             this.count += anzahl;
         	store.informiereMonitore(String.format("name: %s, %d pieces stored. new number of pieces: %d", this.name, anzahl, this.count));
         }else{
-        	String msg = String.format("ERROR: Invalid argument. name: %s, no pieces stored. number of pieces: %d", this.name, this.count);
-        	store.informiereMonitore(msg);
-            throw new EInvalidCount(msg);
-        }
+        	store.informiereMonitore(String.format("ERROR: Invalid argument. name: %s, no pieces stored. number of pieces: %d", this.name, this.count));
+            throw new EInvalidCount();
+        }//if
     }//einlagern
 
     
@@ -70,25 +83,27 @@ public class LagerFachImpl extends FachPOA {
      */
     @Override
     public void auslagern(int anzahl) throws EInvalidCount, ENotEnoughPieces {
+        String msg;
         if(anzahl >= 0)
             if(anzahl <= this.count){
                 this.count -= anzahl;
-        		store.informiereMonitore(String.format("name: %s, %d pieces removed. number of pieces: %d", this.name, anzahl, this.count));
+                msg = String.format("name: %s, %d pieces removed. number of pieces: %d", this.name, anzahl, this.count);
+        		store.informiereMonitore(msg);
             }else{
-            	String msg = String.format("ERROR: %d > %d(stored pieces) name: %s, no pieces removed. number of pieces: %d", anzahl, this.count, this.name, this.count);
+                msg = String.format("ERROR: %d > %d(stored pieces) name: %s, no pieces removed. number of pieces: %d", anzahl, this.count, this.name, this.count);
             	store.informiereMonitore(msg);
                 throw new ENotEnoughPieces(msg);
-            }
+            }//if
         else{
-        	String msg = String.format("ERROR: Invalid argument. name: %s, no pieces removed. number of pieces: %d", this.name, this.count);
+            msg = String.format("ERROR: Invalid argument. name: %s, no pieces removed. number of pieces: %d", this.name, this.count);
         	store.informiereMonitore(msg);
             throw new EInvalidCount(msg);
-        }
-        
+        }//if
     }//auslagern
+    
     
     public void setLager(LagerImpl lager) {
 		this.store = lager;
-	}
+	}//setLager
 
 }//LagerFachImpl
